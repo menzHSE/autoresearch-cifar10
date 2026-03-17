@@ -1,0 +1,90 @@
+commit	best_acc	memory_gb	status	description
+e560881	91.17	0.2	keep	baseline ResNet-20
+9817a40	86.49	0.2	discard	cosine LR with LR=0.2 and T_max=200k (barely decays)
+1c557a1	87.97	0.2	discard	cosine LR with LR=0.2 and T_max=64k
+76cbab2	84.01	0.5	discard	ResNet-56 with step LR (milestones never reached)
+f1f1bde	88.66	0.5	discard	ResNet-56 with cosine LR T_max=12k (too few steps in 5 min)
+9078cb8	91.52	0.2	keep	add Cutout augmentation (16x16 patch)
+cf27548	88.65	0.4	discard	2x wider ResNet-20 (too few steps; milestones not reached)
+32d7dfd	91.78	0.2	keep	add label smoothing 0.1
+9b77af0	92.00	0.2	keep	enable Nesterov momentum
+339d2f7	90.38	0.2	discard	increase weight decay to 5e-4 (too much regularization)
+0e5040a	87.09	0.2	discard	OneCycleLR max_lr=0.3 (too aggressive)
+95a6628	92.01	0.2	keep	increase LR from 0.1 to 0.15
+d1f5616	91.01	0.4	discard	BS=256 with LR=0.3 and halved milestones
+a7306e1	0.00	0.0	crash	torch.compile not supported on Python 3.14
+8027861	92.39	0.2	keep	AMP mixed precision + cudnn.benchmark + TF32
+5bb81dd	92.42	0.2	keep	adjust milestones to 22k/33k for AMP step count
+e2744c0	93.07	0.3	keep	1.5x wider ResNet-20 (base_width=24)
+0fa30e7	92.03	0.3	discard	earlier milestones 16k/24k (too early LR decay)
+ce0d562	94.07	0.4	keep	2x wider ResNet-20 (base_width=32)
+900008a	93.99	0.4	discard	milestones 14k/20k (slightly worse)
+6bb5f90	90.27	0.6	discard	3x wider (base_width=48) - too slow, only 16k steps
+1081318	94.17	0.4	keep	add linear warmup 500 steps
+b653efd	89.92	0.5	discard	base_width=40 (too slow at 18k steps)
+9eab017	94.63	0.4	keep	cosine LR (T_max=27k) + warmup replaces MultiStepLR
+6367690	94.22	0.5	discard	base_width=40 with cosine (still too slow)
+429ecc8	92.61	0.4	discard	ResNet-32 + base_width=32 (too slow at 17k steps)
+d5f5f3c	94.29	0.4	discard	SE blocks (compute overhead reduces steps)
+3f3a856	94.95	0.4	keep	increase LR to 0.2 with cosine schedule
+c8f0833	94.63	0.4	discard	LR=0.3 (too high)
+6f09782	94.82	0.4	discard	ColorJitter augmentation (slightly worse)
+6ba936f	94.89	0.4	discard	weight decay 2e-4 (slightly worse)
+93ee680	94.35	0.4	discard	Cutout size 8 (worse than 16)
+aa14ed4	91.32	0.4	discard	PreActResNet blocks (much worse)
+4b6c43d	94.66	0.4	discard	learned 1x1 shortcuts (option B)
+69400e6	93.99	0.4	discard	RandomRotation(15) hurts
+9d6237b	94.53	0.4	discard	Mixup alpha=0.2 (too much regularization with Cutout+LS)
+b803a67	94.61	0.4	discard	label smoothing 0.05 (0.1 is better)
+5af6b49	94.38	0.4	discard	EMA decay=0.999 (slightly slower + worse)
+352733e	94.18	0.4	discard	TrivialAugmentWide (worse)
+00d3e46	94.71	0.4	discard	gradient clipping max_norm=1.0
+2f0482f	93.42	0.4	discard	ResNet-26 (n=4) - too slow at 21k steps
+f48c827	94.39	0.3	discard	base_width=28 (not enough capacity)
+e6b3cd2	94.58	0.4	discard	cosine T_max=25k (worse)
+94e2b7c	94.67	0.4	discard	persistent_workers + set_to_none (marginal change)
+ca4f8be	94.72	0.4	discard	momentum=0.95 (worse)
+b7321dc	94.78	0.4	discard	LR=0.25 (slightly worse than 0.2)
+db6383f	94.80	0.4	discard	RandomCrop padding=8 (slightly worse)
+e438962	94.59	0.5	discard	wider last stage {32,64,160} (slower)
+ec88a35	94.41	0.4	discard	stochastic depth (0.1 max drop)
+f794aa9	94.63	0.4	discard	CutMix alpha=1.0 replacing Cutout
+8620c88	94.76	0.4	discard	seed=123 variance check (94.95 with seed=42)
+848422a	93.06	0.4	discard	BS=64 LR=0.1 (much worse)
+5c028e0	94.93	0.4	discard	reflect padding in RandomCrop (within noise)
+629ddaa	94.70	0.4	discard	dropout 0.1 before FC
+cc9f72c	94.36	0.6	discard	ResNet-14 (n=2) with base_width=48
+4966955	94.22	0.4	discard	2 Cutout holes (too much augmentation)
+5362962	93.49	0.4	discard	AdamW (lr=1e-3 wd=0.05) - SGD better
+b17dc3f	93.28	0.4	discard	no Cutout or label smoothing (confirms they help)
+df78c1d	94.63	0.4	discard	label smoothing 0.15 (0.1 is optimal)
+6e3df68	94.34	0.4	discard	Cutout size 12 (16 is optimal)
+2a3083b	93.86	0.9	discard	4th stage (256ch@4x4) - too many params/VRAM
+a0efabd	94.87	0.4	discard	SWA from last 25% (slightly worse)
+19ec2fe	10.00	0.4	crash	SAM broken with AMP scaler
+c2cf7d9	95.37	0.4	keep	replace ReLU with GeLU activation
+a7b29cd	95.30	0.4	discard	LR=0.25 with GeLU (0.2 is better)
+0937204	95.22	0.4	discard	cosine T_max=30k (27k is better)
+7b9010a	94.78	0.4	discard	weight decay 3e-4 with GeLU (too much)
+4352d9a	95.18	0.4	discard	AutoAugment CIFAR10 policy (too much aug)
+8a8e0c5	94.22	0.4	discard	remove Cutout (much worse - still needed)
+4fde552	95.11	0.4	discard	SiLU (Swish) activation (GeLU is better)
+d7ba735	94.97	0.4	discard	cosine warm restarts T_0=9k (worse than single cosine)
+b91f552	95.16	0.4	discard	double conv stem (extra complexity no gain)
+0490e19	94.62	0.4	discard	weight decay 5e-5 (too little regularization)
+ef64d1b	95.00	0.4	discard	hidden FC layer 128->256->10 (worse)
+279b890	94.59	0.4	discard	Mish activation (GeLU is better)
+312629e	94.63	0.4	discard	asymmetric widths {24,64,128} (less capacity)
+fe944da	94.94	0.4	discard	longer warmup 1000 steps (worse)
+fb7b35d	94.72	0.4	discard	RandomErasing instead of Cutout (worse)
+a0dd292	94.99	0.4	discard	cosine eta_min=0 (1e-5 is better)
+836a5d7	94.76	0.4	discard	random Cutout size 8-16 (fixed 16 is better)
+b0fc670	94.74	0.4	discard	cosine T_max=24k (worse)
+aa85c81	94.65	0.4	discard	final BatchNorm1d before FC (worse)
+e640106	94.94	0.4	discard	seed=0 variance check (95.37 with seed=42)
+f35c740	94.75	0.4	discard	PolynomialLR power=2 (cosine is better)
+bb821d1	94.10	0.4	discard	concat avg+max pooling (much worse)
+d7fcfdd	94.69	0.4	discard	Xavier normal init (Kaiming still better)
+db31fef	94.57	0.4	discard	zero-init BN gamma in residual branches (worse)
+c2ba473	94.81	0.4	discard	Cutout size 20 (16 is optimal)
+71fd906	95.08	0.4	discard	Mixup alpha=0.1 with GeLU (within noise)

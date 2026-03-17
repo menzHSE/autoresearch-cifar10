@@ -1,0 +1,36 @@
+[project]
+name = "autoresearch-cifar10"
+version = "0.1.0"
+description = "Autonomous research but make it Computer Vision"
+license="MIT"
+license-files = ["LICENSE"]
+authors = [{name = 'Guillaume ERHARD'}]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "numpy>=2.2,<2.4",
+    "pandas>=2.3.3",
+    "pyarrow>=21.0.0",
+    "torch==2.9.1",
+    "torchvision==0.24.1",
+]
+
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu128" },
+]
+torchvision = [
+    { index = "pytorch-cu128" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    "ruff>=0.15.5",
+]

@@ -1,0 +1,95 @@
+commit	best_acc	memory_gb	status	description
+c41dce7	91.22	0.2	keep	baseline ResNet-20
+5ee03bf	89.49	0.2	discard	cosine annealing LR (T_max=MAX_STEPS)
+93b2a3a	87.36	0.4	discard	2x wider ResNet-20 (step milestones misaligned)
+5ba31a5	91.14	0.2	discard	Cutout 16x16 augmentation only
+a42df3d	91.01	0.2	discard	weight decay 5e-4 + Nesterov momentum
+0a0f0ec	91.55	0.2	keep	Nesterov momentum only
+d9a684b	91.78	0.2	keep	add label smoothing 0.1
+cad3e24	91.64	0.2	discard	mixup alpha=0.2 (over-regularized)
+2943b3c	92.00	0.2	keep	LR 0.2
+0c16e18	0.00	0.0	crash	torch.compile (not supported on Python 3.14)
+117b2d1	91.99	0.2	discard	cudnn benchmark + AMP (no improvement; added complexity)
+b72e49c	87.96	0.2	discard	OneCycleLR (total_steps mismatch)
+06c17d4	91.31	0.4	discard	batch 256 LR 0.4 (fewer epochs hurt)
+008b78c	87.43	0.2	discard	SE blocks (too slow; milestones never reached)
+66410dc	91.62	0.2	discard	time-proportional LR drops
+23cd150	91.48	0.2	discard	LR warmup 5 epochs (wasted budget)
+f125414	91.01	0.2	discard	weight decay 2e-4
+359f90c	89.82	0.2	discard	EMA decay=0.999 (lagged too far)
+052c859	91.16	0.2	discard	LR 0.3 (too high)
+2531027	86.74	0.2	discard	milestones 40k/56k (too late)
+a376982	91.13	0.2	discard	ColorJitter + RandomErasing (over-regularized)
+e2539cd	91.65	0.2	discard	pre-activation ResNet v2
+cc7556a	91.70	0.2	discard	1x1 conv projection shortcuts
+61e95a4	89.43	0.5	discard	ResNet-56 (too slow; 32 epochs only)
+f57c3fb	91.33	0.3	discard	ResNet-32 (milestones too late; 56 epochs)
+2146e03	91.47	0.2	discard	channels_last (slower for small model)
+790a6ab	91.39	0.2	discard	label smoothing 0.05
+81b226d	89.25	0.2	discard	AdamW + cosine (SGD better for CIFAR)
+eaf3e89	91.70	0.3	discard	grad clip + cudnn benchmark (slower)
+d80d5e9	91.63	0.2	discard	grad clipping alone (per-step overhead)
+96b3c91	91.66	0.2	discard	MAX_STEPS 200k (34k actual; time-limited)
+21bf269	91.75	0.2	discard	milestones 17k/25.5k (proper 50/75% but worse)
+2da7954	92.05	0.2	keep	single late LR drop at 30k (88%)
+91ee779	91.67	0.2	discard	LR drop at 31k (too late)
+95c6124	91.92	0.2	discard	LR drop at 28k (slightly worse)
+2f3ad55	91.77	0.2	discard	Cutout 8x8 (still hurts)
+9d13053	86.12	0.2	discard	wall-clock timing (includes data loading; bad)
+ff76dd6	92.04	0.2	keep	simplify: loss.item() only in print block
+16b146b	91.82	0.2	discard	gamma=0.05 (too aggressive)
+0477613	91.44	0.2	discard	gamma=0.2 (too gentle)
+75177b8	91.42	0.2	discard	persistent_workers (no effect)
+505af2b	92.12	0.2	keep	two late drops at 27k/31k
+acfef17	92.25	0.2	keep	two late drops at 26k/30k
+d6e3c56	91.94	0.2	discard	drops at 25k/29k (too early)
+1f07901	92.13	0.2	discard	three drops at 26k/30k/33k (two better)
+5b079b4	91.90	0.2	discard	LR 0.15 with 26k/30k schedule
+92d1e8d	91.84	0.2	discard	mixup alpha=0.1 (still hurts)
+6b8bdec	91.99	0.2	discard	set_to_none=True (no effect)
+d027c6c	91.97	0.2	discard	label smoothing 0.15
+f45dcc1	91.69	0.2	discard	RandomCrop padding=6
+cc2ddd4	91.59	0.2	discard	no label smoothing (hurts)
+8eb0d4e	92.53	0.3	keep	GeLU activation instead of ReLU
+230cef6	92.50	0.3	discard	label smoothing 0.15 with GeLU
+rvrt53	89.14	0.3	discard	1.5x wider (24/48/96) milestones misaligned
+28ca830	92.66	0.3	keep	SiLU activation instead of GeLU
+9dba6ac	92.34	0.3	discard	Mish activation (slower than SiLU)
+b225391	92.65	0.3	discard	dropout 0.1 before FC (no improvement)
+633155c	92.43	0.5	discard	ResNet-32 SiLU milestones 19k/22k (fewer epochs)
+dd5e0c9	90.79	0.3	discard	weight decay 5e-4 with SiLU (over-regularized)
+b154fdc	87.72	0.3	discard	wall-clock timing minus eval (data loading stalls)
+2976270	92.24	0.3	discard	three gradual LR drops 24k/28k/31k (worse)
+b69dfe2	92.71	0.3	keep	stochastic depth max drop rate 0.1
+7485cb9	91.70	0.3	discard	stochastic depth max rate 0.2 (too strong)
+46a4101	92.38	0.3	discard	stochastic depth max rate 0.05 (too weak)
+d7ed52e	92.50	0.3	discard	LR 0.25 with stochastic depth (too high)
+0b1c3dd	92.59	0.3	discard	milestones 27k/31k (slightly worse)
+55d22d5	91.65	0.3	discard	AutoAugment CIFAR10 (over-regularized + slower)
+3c4f80c	92.44	0.4	discard	wider 20/40/80 milestones 21k/25k (2nd never fired)
+7483df5	92.50	0.4	discard	wider 20/40/80 milestones 17k/20k (not enough epochs)
+524d75d	92.62	0.3	discard	cosine annealing T_max=36000 (close but worse)
+c406f19	92.60	0.3	discard	weight decay 2e-4 with stochastic depth
+8bb1e84	92.18	0.3	discard	stochastic depth max rate 0.15 (too strong)
+71420a8	91.91	0.3	discard	kaiming_normal_ mode=fan_out (worse)
+709a4fd	92.55	0.3	discard	BN momentum 0.05 (worse)
+e121f56	92.74	0.4	keep	ResNet-26 (4 blocks) milestones 21k/25k
+d497486	92.61	0.4	discard	ResNet-26 milestones 19k/23k (too early)
+b8c02bd	92.72	0.4	discard	ResNet-26 milestones 20k/24k (tied)
+5e0f572	92.44	0.4	discard	label smoothing 0.05 with ResNet-26
+1346243	92.60	0.4	discard	1x1 conv projection shortcuts ResNet-26
+891bbb9	92.71	0.2	discard	AMP ResNet-26 milestones 25k/30k (close but worse)
+696dd67	92.72	0.2	discard	AMP ResNet-26 milestones 24k/28k (tied)
+f55b6bf	92.56	0.4	discard	gamma=0.2 ResNet-26 (too gentle)
+115159f	91.93	0.2	discard	batch 64 LR 0.1 ResNet-26 (per-step overhead too high)
+5aa482f	88.28	0.4	discard	sync every 10 steps (included data loading time)
+7fce72c	91.28	0.4	discard	TrivialAugmentWide (over-regularized)
+98d8c5d	92.14	0.3	discard	asymmetric [2/2/8] milestones misaligned
+d0bda1b	92.75	0.4	keep	wider layer3 (128 ch) milestones 21k/25k
+f95bc62	93.39	0.4	keep	milestones 17k/20k for wider layer3
+d942d3d	93.32	0.4	discard	milestones 16k/19k (slightly early)
+c6b0c8f	93.19	0.4	discard	milestones 18k/21k (too late)
+c04e79b	88.70	0.6	discard	layer3=192ch (too slow; 14.9k steps)
+014e6d1	92.37	0.5	discard	wider layer2=48 (too slow; 17.8k steps)
+c82bbb0	92.87	0.3	discard	ResNet-20 with 128ch layer3 (4 blocks better)
+f663135	92.88	0.4	discard	layer3=96ch milestones 18k/21k (128ch better)

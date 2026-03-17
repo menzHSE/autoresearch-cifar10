@@ -1,0 +1,60 @@
+commit	best_acc	memory_gb	status	description
+1b13567	83.42	0.2	keep	baseline ResNet-20
+374f6b8	81.72	0.2	discard	cosine LR schedule + LR 0.2
+987b1b8	85.60	0.2	keep	cosine LR with LR=0.1 and MAX_STEPS=5000
+41829ec	82.13	0.4	discard	double model width {32 64 128} - too slow to converge in 60s
+8ac3d09	85.16	0.2	discard	RandomErasing + Nesterov - augmentation too aggressive for 60s
+c077c86	86.00	0.2	keep	Nesterov momentum
+01d003c	86.52	0.3	keep	widen model 1.5x filters {24 48 96}
+cacdd27	85.35	0.3	discard	label smoothing 0.1 - hurts with short training
+91fc17f	88.09	0.3	keep	OneCycleLR max_lr=0.3 pct_start=0.3
+3a80c48	82.72	0.6	discard	batch size 256 - fewer updates hurts
+1331f58	87.85	0.3	discard	OneCycleLR max_lr=0.5 - 0.3 was better
+deb7b02	85.79	0.3	discard	weight decay 5e-4 - too much regularization
+6dc3814	80.17	0.5	discard	ResNet-32 depth - too slow fewer steps in 60s
+a636d56	88.13	0.3	keep	shallow+wide ResNet-14 filters {32 64 128}
+f92553c	82.92	0.5	discard	ResNet-14 too wide {48 96 192} - too slow
+ff0f6b4	0.00	0.0	crash	torch.compile - not supported on Python 3.14
+91980db	90.36	0.2	keep	mixed precision AMP - hits 5000 steps less memory
+bef9044	91.18	0.2	keep	MAX_STEPS=8000 - more steps with AMP
+5b44e68	87.96	0.2	discard	MAX_STEPS=10000 - LR schedule mismatch with actual steps
+d696396	87.40	0.2	discard	ResNet-20 {24 48 96} + AMP - fewer steps than ResNet-14
+9057bcf	91.46	0.2	keep	OneCycleLR max_lr=0.4 pct_start=0.2
+42de740	91.49	0.2	keep	OneCycleLR max_lr=0.5
+233b39c	91.75	0.2	keep	OneCycleLR max_lr=0.6
+36bfed4	91.33	0.2	discard	OneCycleLR max_lr=0.8 - too high
+43eb143	89.35	0.2	discard	SE blocks - slower per step outweighs benefit
+d393523	90.00	0.3	discard	ResNet-8 {64 128 256} - too shallow
+52df249	91.20	0.2	discard	weight decay 2e-4
+db0c091	91.30	0.2	discard	dropout 0.1 before FC
+d709d57	91.15	0.4	discard	cudnn.benchmark + TF32 + pct_start=0.1
+dd7a87a	91.34	0.4	discard	cudnn.benchmark only - extra VRAM no accuracy gain
+038e986	91.29	0.2	discard	mixup alpha=0.2 - needs longer training
+4180090	86.42	0.3	discard	ResNet-14 {40 80 160} - too slow
+78a1881	91.51	0.2	discard	gradient clipping max_norm=1.0
+5720987	91.37	0.2	discard	projection shortcuts (1x1 conv)
+18ef03a	90.88	0.2	discard	batch size 96 - less informative steps
+4dc5dea	91.86	0.2	keep	SiLU activation instead of ReLU
+3ce24b5	91.37	0.2	discard	RandomCrop padding 6 instead of 4
+9c5f2c5	87.74	0.2	discard	EMA model averaging - needs longer training
+5252dd8	90.61	0.2	discard	ColorJitter augmentation
+0e860bd	90.32	0.2	discard	OneCycleLR max_lr=0.7 with SiLU
+10ec5b2	90.45	0.2	discard	AdamW optimizer - SGD still better
+452d808	89.29	0.2	discard	pre-activation ResNet
+db0f0bc	86.55	0.3	discard	ResNet-20 wide {32 64 128} + SiLU - too slow
+f1b4a09	89.82	0.2	discard	5x5 initial conv
+c32f288	91.17	0.2	discard	momentum 0.95
+142ec2a	88.47	0.2	discard	MLP head
+b2ea391	89.40	0.2	discard	asymmetric widths {24 64 160}
+213135c	90.59	0.2	discard	pct_start=0.15
+67212c3	90.49	0.2	discard	seed 0 instead of 42
+c5c2a65	90.00	0.2	discard	pct_start=0.25
+172730e	90.85	0.2	discard	weight decay 5e-5
+398b5ce	89.36	0.2	discard	4th stage 256ch - too much overhead
+8a5e785	90.46	0.2	discard	persistent_workers - slower
+136fe07	89.95	0.2	discard	OneCycleLR max_lr=0.55
+24914e8	91.38	0.2	discard	MAX_STEPS=7500
+aade920	89.60	0.2	discard	kaiming_normal fan_out mode
+3d4f552	90.42	0.2	discard	zero_grad(set_to_none=True) - fewer steps
+32e5d35	82.49	0.6	discard	inverted bottleneck blocks - too slow
+d2baef6	87.76	0.2	discard	bfloat16 - slower than fp16 on this GPU
