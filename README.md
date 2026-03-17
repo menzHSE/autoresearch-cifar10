@@ -17,8 +17,12 @@ But this leaves you with only three hyperparameters to define: the model, the pr
 ![Scatter plot showing accuracy per attempt number for the four configurations](plots/plot_attempt_vs_accuracy.png)
 
 
-To complete the results I then reran them for 1/5/10 min to see if the setup would generalize. The first clear validated hypothesis with an enormous sample of two is that an auto-generated program.md seem to be more performant than my hand-crafted artisanal one.
-They all beat the original ResNet-20 (91.89% / 8.5 min), from 91.36% for the 1-min handcrafted run (92.28% when given 5 min) up to 95.39% for the 5-min auto-generated one run for 10 min. Looking at what Claude decided to do (see folder ./search_results) it seems there is a pattern that emerges : 
+To complete the results I then reran them for 1/5/10 min to see if the setup would generalize.
+The first clear validated hypothesis with an enormous sample of two is that an auto-generated `program.md` seems more performant than my hand-crafted artisanal one.
+
+They all beat the original ResNet-20 (91.89% / 8.5 min), ranging from 91.36% for the 1-min handcrafted run (92.28% when given 5 min) up to 95.39% for the 5-min auto-generated one run for 10 min.
+
+Looking at what Claude decided to do (see `./search_results`) a pattern emerges:
 
 1. The first move seem to replace the MultiStepLR scheduler to a CosineAnnealingLR or OneCycleLR. For that it needs to predict for how many epoch the program will run. Though it is not always successfully for the 1 min budget time and gets stuck on MultiStepLR.  
 2. It understands clearly that with a better throughput the model can go through more steps and therefore get better result. The usual are tried then batch_size / torch.compile / bfloat16
@@ -30,10 +34,18 @@ They all beat the original ResNet-20 (91.89% / 8.5 min), from 91.36% for the 1-m
 
 ## Learnings
 
-After ~8h for each 5m training budget and ~1.5h for the 1m training budget the model will give up at around 70/90 tries and end by generating a nice table or paragraph explaining what it changed. This breaks the "loop forever" promise of the program.md, but is normal as LLM are trained to not output forever.
-A simple heads up to continue will make it go again and a more definitive fix can be done with a simple script.  
-What it tries during that time is really sensible, nothing breakthrough, and it never tries to go on the internet for ideas or to pick a better starting setup without prompting for it despite being mentioned in the program.md. A fun fact it did cheat on one of my run when it found a result.tsv and pick ideas from it. So if you run it, do it in a clean state.
-I will more link the lack of breakthrough or exotic change to the starting setup. In the original autoresearch it leads to non-trivial improvements as its starting point was already well optimized. It also gives up pretty easily, as it drops his ideas after 2/3 tries at most. If you suggest via prompting it will go on for 10+ times before asking for some feedback. 
+After ~8h for each 5-min training budget and ~1.5h for the 1-min budget, the model gives up at around 70–90 tries and ends by generating a summary table or paragraph of what it changed.
+This breaks the "loop forever" promise of `program.md`, but is expected as LLMs are trained to not output forever.
+A simple prompt will make it continue, and a more definitive fix can be done with a simple script.
+
+What it tries is sensibl, nothing breakthrough, and it never goes to the internet for new ideas or picks a better starting architecture without being prompted, despite that being a possibility mentioned in `program.md`.
+One fun fact is it did cheat on one of my run when it found a `results.tsv` and picked ideas from it. So if you run it **run in a clean state.**
+
+The absence of breakthrough or exotic changes is likely linked to the starting setup.
+In the original autoresearch it leads to non-trivial improvements as its starting point was already well optimized.
+The agent also gives up on ideas pretty easily, dropping them after 2–3 tries.
+Whereas when prompted it keeps pushing and will run 10+ variations before asking for feedback.
+
 This is probably the killer feature of autoresearch having an (almost) tireless agent that can optimize not just parameters but your code for a few $/€ per hour.
 
 ## What could be improved
