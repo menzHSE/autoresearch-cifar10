@@ -22,7 +22,6 @@ LR = 0.1
 MOMENTUM = 0.9
 WEIGHT_DECAY = 1e-4
 MAX_STEPS = 64000
-evaluator = Eval()
 
 
 # ---------------------------------------------------------------------------
@@ -70,8 +69,6 @@ class ResNet(nn.Module):
 
     @staticmethod
     def _weights_init(m):
-        # Kaiming init normal instead of default uniform per "Delving Deep into Rectifiers" (He et al. 2015), cited as
-        # [13] in the ResNet paper
         if isinstance(m, (nn.Conv2d, nn.Linear)):
             init.kaiming_normal_(m.weight)
 
@@ -95,25 +92,63 @@ class ResNet(nn.Module):
 
 
 # ---------------------------------------------------------------------------
+# Device selection: CUDA → MPS → CPU
+# ---------------------------------------------------------------------------
+
+def get_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
+def synchronize(device: torch.device):
+    """Device-agnostic barrier so per-step timing stays accurate."""
+    if device.type == "cuda":
+        torch.cuda.synchronize()
+    elif device.type == "mps":
+        torch.mps.synchronize()
+
+
+def peak_vram_mb(device: torch.device) -> float:
+    if device.type == "cuda":
+        return torch.cuda.max_memory_allocated() / 1024 / 1024
+    if device.type == "mps":
+        return torch.mps.current_allocated_memory() / 1024 / 1024
+    return 0.0
+
+
+# ---------------------------------------------------------------------------
 # Training & evaluation
 # ---------------------------------------------------------------------------
 
 
 def main():
-    # ---------------------------------------------------------------------------
-    # Setup
-    # ---------------------------------------------------------------------------
-
     t_start = time.time()
     torch.manual_seed(42)
-    torch.cuda.manual_seed(42)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    device = get_device()
     print(f"Device: {device}")
+
+    if device.type == "cuda":
+        torch.cuda.manual_seed(42)
+    elif device.type == "mps":
+        torch.mps.manual_seed(42)
+
+    # Construct evaluator now that device is known
+    evaluator = Eval(device)
+
+    # Warm up eval workers so the first epoch doesn't pay the spawn cost
+    print("Warming up eval workers...")
+    for _ in evaluator.loader:
+        break
+    print("Ready.")
 
     mean, std = (
         (0.4914, 0.4822, 0.4465),
         (1, 1, 1),
-    )  # Yes original paper only mention per-pixel mean and this is per band. See README
+    )
     train_tf = transforms.Compose(
         [
             transforms.RandomCrop(32, padding=4),
@@ -126,13 +161,17 @@ def main():
     train_set = datasets.CIFAR10(
         DATASET_DIR, train=True, download=True, transform=train_tf
     )
+
+    pin = device.type == "cuda"
     train_loader = DataLoader(
         train_set,
         batch_size=BATCH_SIZE,
         shuffle=True,
         num_workers=NUM_WORKERS,
-        pin_memory=True,
+        pin_memory=pin,
         drop_last=True,
+        persistent_workers=True,
+        prefetch_factor=4,
     )
 
     model = ResNet(NUM_BLOCKS, NUM_CLASSES).to(device)
@@ -175,7 +214,7 @@ def main():
             optimizer.step()
             scheduler.step()
 
-            torch.cuda.synchronize()
+            synchronize(device)
             dt = time.time() - t0
             total_training_time += dt
             step += 1
@@ -220,9 +259,6 @@ def main():
 
     t_end = time.time()
     startup_time = t_start_training - t_start
-    peak_vram_mb = (
-        torch.cuda.max_memory_allocated() / 1024 / 1024 if device.type == "cuda" else 0
-    )
 
     print("---")
     print(f"best_test_acc:    {best_acc:.2f}%")
@@ -231,7 +267,7 @@ def main():
     print(f"training_seconds: {total_training_time:.1f}")
     print(f"total_seconds:    {t_end - t_start:.1f}")
     print(f"startup_seconds:  {startup_time:.1f}")
-    print(f"peak_vram_mb:     {peak_vram_mb:.1f}")
+    print(f"peak_vram_mb:     {peak_vram_mb(device):.1f}")
     print(f"num_epochs:       {epoch}")
     print(f"num_steps:        {step}")
     print(f"num_params:       {num_params:,}")
