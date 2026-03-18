@@ -9,7 +9,7 @@ DATASET_DIR = "./data"
 
 
 class Eval:
-    def __init__(self):
+    def __init__(self, device: torch.device):
         mean, std = (0.4914, 0.4822, 0.4465), (1, 1, 1)
 
         test_tf = transforms.Compose(
@@ -26,7 +26,9 @@ class Eval:
             batch_size=256,
             shuffle=False,
             num_workers=NUM_WORKERS,
-            pin_memory=True,
+            pin_memory=(device.type == "cuda"),
+            persistent_workers=True,
+            prefetch_factor=4,
         )
 
     @torch.inference_mode()
